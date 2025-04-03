@@ -3,23 +3,26 @@
 
 #include "ItemBase.h"
 #include <Minecraft/MinecraftCharacter.h>
+#include "Components/SphereComponent.h"
 
-// Sets default values
 AItemBase::AItemBase()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	smComp = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("smComp"));
+	sphereComp = CreateDefaultSubobject<USphereComponent>(TEXT("sphereComp"));
 
+	SetRootComponent(sphereComp);
+	smComp->SetupAttachment(sphereComp);
+	sphereComp->OnComponentBeginOverlap.AddDynamic(this, &AItemBase::OnOverlapItem);
 }
 
-// Called when the game starts or when spawned
 void AItemBase::BeginPlay()
 {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
 void AItemBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
@@ -32,6 +35,7 @@ void AItemBase::OnOverlapItem(UPrimitiveComponent* OverlappedComponent, AActor* 
 	if (AMinecraftCharacter* player = Cast<AMinecraftCharacter>(OtherActor))
 	{
 		player->AddItemToInventory(itemData); // 인벤토리에 아이템 추가
+
 		Destroy(); // 아이템 제거
 	}
 }

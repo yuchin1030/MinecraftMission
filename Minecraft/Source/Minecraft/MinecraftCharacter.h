@@ -46,7 +46,13 @@ class AMinecraftCharacter : public ACharacter
 	UInputAction* LookAction;
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
-	UInputAction* WheelAction;
+	UInputAction* ia_Wheel;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ia_Left;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, meta = (AllowPrivateAccess = "true"))
+	UInputAction* ia_Right;
 public:
 	AMinecraftCharacter();
 	
@@ -55,11 +61,35 @@ public:
 
 	class UPlayerMainWidget* playerMainUI;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	TArray<AItemBase*> quickSlot;
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class AShover> shovel_bp;
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class AHoe> hoe_bp;
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class ACrop> crop_bp;
+
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	int32 currentSlotIndex = 0;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	int32 maxSlot = 8;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	class ABlock* block;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	bool bCanMining = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	bool bCanFarming = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	bool bCanPlanting = false;
 
 	UFUNCTION()
 	void ChangeSlotIndex(const FInputActionValue& Value);
@@ -67,11 +97,27 @@ public:
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	TMap<FName, FItemBaseData> inventory;
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float playerExp = 0;
+
 	UFUNCTION()
 	void AddItemToInventory(const FItemBaseData& itemDataList);
 
-	
+	UFUNCTION()
+	void PlaceBlock();
 
+	// 아이템 사용 함수
+	UFUNCTION()
+	void UseItem();
+
+	UFUNCTION()
+	void DigGround();
+
+	UFUNCTION()
+	void MiningBlock();
+
+	UFUNCTION()
+	void PlantSeed();
 protected:
 
 	/** Called for movement input */

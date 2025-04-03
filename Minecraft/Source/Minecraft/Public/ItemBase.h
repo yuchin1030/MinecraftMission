@@ -18,29 +18,43 @@ public:
 	UPROPERTY(BlueprintReadWrite)
 	int32 itemAmount;
 
-	FItemBaseData()
-		: itemName("Default"), itemAmount(0) {}
+	/*FItemBaseData()
+		: itemName("Default"), itemAmount(0) {}*/
 };
 
+UENUM(BlueprintType)
+enum class EItemType : uint8
+{
+	Shovel,   // »ð
+	Hoe,      // ±ªÀÌ
+	Seed,     // ¾¾¾Ñ
+	Default   // ±âº» °ª
+};
 
-UCLASS()
+UCLASS(Blueprintable)
 class MINECRAFT_API AItemBase : public AActor
 {
 	GENERATED_BODY()
 	
 public:	
-	// Sets default values for this actor's properties
 	AItemBase();
 
 protected:
-	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 public:	
-	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	UPROPERTY(VisibleAnywhere)
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	EItemType itemType;
+
+	UPROPERTY(EditAnywhere)
+	class UStaticMeshComponent* smComp;
+
+	UPROPERTY(EditAnywhere)
+	class USphereComponent* sphereComp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	FItemBaseData itemData;
 
 	UFUNCTION()
