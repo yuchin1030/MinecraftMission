@@ -11,6 +11,11 @@
 #include "EnhancedInputSubsystems.h"
 #include "InputActionValue.h"
 #include "PlayerMainWidget.h"
+#include "Block.h"
+#include "Shover.h"
+#include "Hoe.h"
+#include "Crop.h"
+#include "EngineUtils.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
 
@@ -53,11 +58,11 @@ AMinecraftCharacter::AMinecraftCharacter()
 
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
+	quickSlot.SetNum(8);
 }
 
 void AMinecraftCharacter::BeginPlay()
 {
-	// Call the base class  
 	Super::BeginPlay();
 
 	if (playerMainUI_bp != nullptr)
@@ -69,6 +74,28 @@ void AMinecraftCharacter::BeginPlay()
 			playerMainUI->AddToViewport();
 		}
 	}
+
+	// 레벨에 배치된 ABlock 클래스를 찾아서 block 변수에 저장
+	for (TActorIterator<ABlock> it(GetWorld()); it; ++it)
+	{
+		block = *it;
+		UE_LOG(LogTemp, Warning, TEXT("Find ABlock!!"));
+		break;  
+	}
+
+	if (!block)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("ABlock not in the level"));
+	}
+
+	AItemBase* shovel = GetWorld()->SpawnActor<AItemBase>(shovel_bp, FVector::ZeroVector, FRotator::ZeroRotator);
+	quickSlot[0] = shovel;
+
+	AItemBase* hoe = GetWorld()->SpawnActor<AItemBase>(hoe_bp, FVector::ZeroVector, FRotator::ZeroRotator);
+	quickSlot[1] = hoe;
+
+	AItemBase* crop = GetWorld()->SpawnActor<AItemBase>(crop_bp, FVector::ZeroVector, FRotator::ZeroRotator);
+	quickSlot[2] = crop;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -98,7 +125,14 @@ void AMinecraftCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		// Looking
 		EnhancedInputComponent->BindAction(LookAction, ETriggerEvent::Triggered, this, &AMinecraftCharacter::Look);
 
-		EnhancedInputComponent->BindAction(WheelAction, ETriggerEvent::Triggered, this, &AMinecraftCharacter::ChangeSlotIndex);
+		// 퀵슬롯
+		EnhancedInputComponent->BindAction(ia_Wheel, ETriggerEvent::Triggered, this, &AMinecraftCharacter::ChangeSlotIndex);
+
+		// 우클릭(블록 생성)
+		EnhancedInputComponent->BindAction(ia_Left, ETriggerEvent::Started, this, &AMinecraftCharacter::UseItem);
+
+		// 우클릭(블록 생성)
+		EnhancedInputComponent->BindAction(ia_Right, ETriggerEvent::Started, this, &AMinecraftCharacter::UseItem);
 	}
 	else
 	{
@@ -108,6 +142,8 @@ void AMinecraftCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 
 void AMinecraftCharacter::ChangeSlotIndex(const FInputActionValue& Value)
 {
+	bCanFarming = false; bCanPlanting = false;
+
 	float scrollValue = Value.Get<float>(); // -1.0 또는 1.0 값이 들어옴
 
 	if (scrollValue > 0)
@@ -137,7 +173,96 @@ void AMinecraftCharacter::AddItemToInventory(const FItemBaseData& itemData)
 		inventory.Add(itemData.itemName, itemData);
 	}
 
-	UE_LOG(LogTemp, Warning, TEXT("아이템 추가: %s (수량: %d)"), *itemData.itemName.ToString(), inventory[itemData.itemName].itemAmount);
+	UE_LOG(LogTemp, Warning, TEXT("Add item: %s, %d"), *itemData.itemName.ToString(), inventory[itemData.itemName].itemAmount);
+}
+
+void AMinecraftCharacter::UseItem()
+{
+	if (quickSlot.IsValidIndex(currentSlotIndex))  // 인덱스가 올바른지 확인
+	{
+		AItemBase* currentItem = quickSlot[currentSlotIndex];
+
+		if (currentItem)
+		{
+			switch (currentItem->itemType)
+			{
+			case EItemType::Shovel:	// 삽
+				DigGround();
+				break;
+
+			case EItemType::Hoe:	// 괭이
+				MiningBlock();
+				break;
+
+			case EItemType::Seed:	// 씨앗
+				PlantSeed();
+				break;
+
+			default:
+				UE_LOG(LogTemp, Warning, TEXT("Empty Slot"));
+				break;
+			}
+		}
+		else
+		{
+			UE_LOG(LogTemp, Warning, TEXT("No item"));
+		}
+	}
+}
+
+void AMinecraftCharacter::DigGround()
+{
+	UE_LOG(LogTemp, Warning, TEXT("can farming"));
+	bCanFarming = true;
+}
+
+void AMinecraftCharacter::MiningBlock()
+{
+	UE_LOG(LogTemp, Warning, TEXT("mining"));
+	bCanMining = true;
+}
+
+void AMinecraftCharacter::PlantSeed()
+{
+	bCanPlanting = true;
+	UE_LOG(LogTemp, Warning, TEXT("plant seed successfully"));
+
+}
+void AMinecraftCharacter::PlaceBlock()
+{
+	//if (!block) 
+	//	return;
+
+	//UE_LOG(LogTemp, Warning, TEXT("Block is in the level"));
+
+	//FVector start = FollowCamera->GetComponentLocation();
+	//FVector end = start + FollowCamera->GetComponentRotation().Vector() * 500.0f;
+
+	//FHitResult hitResult;
+	//FCollisionQueryParams params;
+	//params.AddIgnoredActor(this);
+
+	//bool bHit = GetWorld()->LineTraceSingleByChannel(hitResult, start, end, ECollisionChannel::ECC_Visibility, params);
+	//
+	//if (bHit)
+	//{
+	//	FVector blockLoc = hitResult.ImpactNormal;
+	//	blockLoc = FVector(
+	//		FMath::GridSnap(blockLoc.X, 100.0f),  // 그리드에 맞춰 정렬
+	//		FMath::GridSnap(blockLoc.Y, 100.0f),
+	//		FMath::GridSnap(blockLoc.Z, 100.0f)
+	//	);
+
+	//	block->AddBlock(blockLoc);
+
+	//	UE_LOG(LogTemp, Warning, TEXT("Hit!!"));
+	//	DrawDebugLine(GetWorld(), start, hitResult.Location, FColor::Green, false, 2.0f, 0, 1.0f);
+	//}
+	//else
+	//{
+	//	UE_LOG(LogTemp, Warning, TEXT("Not Hit!!"));
+	//	DrawDebugLine(GetWorld(), start, end, FColor::Red, false, 2.0f, 0, 1.0f);
+	//}
 }
 
 
