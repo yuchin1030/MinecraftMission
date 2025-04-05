@@ -8,11 +8,9 @@ ACrop::ACrop()
 	PrimaryActorTick.bCanEverTick = true;
 
 	itemData.itemName = TEXT("Crop"); 
+	itemData.itemTag = TEXT("Farm");
 	itemData.itemAmount = 1; 
-
-	/*cropDataMap.Add(TEXT("Wheat"), { 5, 3.f });
-	cropDataMap.Add(TEXT("Potato"), { 10, 5.f });
-	cropDataMap.Add(TEXT("Carrot"), { 15, 10.f });*/
+	itemType = EItemType::Seed;
 
 }
 
@@ -24,6 +22,31 @@ void ACrop::BeginPlay()
 void ACrop::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
+
+	if (bCanGrow)
+	{
+		currentTime += DeltaTime;
+
+		if (currentTime > growingTime)
+		{
+			bCanGrow = false;
+			currentTime = 0;
+
+			bCanHarvest = true;
+
+			spawnedCrop->smComp->SetMaterial(0, spawnedCrop->cropData.cropMat);
+
+			UE_LOG(LogTemp, Warning, TEXT("You can harvest!"));
+		}
+
+	}
+}
+
+void ACrop::Grow(float _growingTime, ACrop* _spawnedCrop)
+{
+	bCanGrow = true;
+	growingTime = _growingTime;
+	spawnedCrop = _spawnedCrop;
 }
 
 

@@ -16,10 +16,10 @@ public:
 	FName cropName;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float cropExp;
+	float growingTime;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float growTime;
+	UMaterialInterface* cropMat;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bPlantSuccess = false;
@@ -46,4 +46,14 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	FCropData cropData;
 	
+	float currentTime = 0;
+	float growingTime = 0;
+
+	bool bCanGrow = false;
+	bool bCanHarvest = false;
+
+	UFUNCTION()
+	void Grow(float _growingTime, ACrop* _spawnedCrop);
+
+	ACrop* spawnedCrop;
 };

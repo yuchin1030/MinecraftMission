@@ -15,6 +15,8 @@
 #include "Shover.h"
 #include "Hoe.h"
 #include "Crop.h"
+#include "Wheat.h"
+#include "Potato.h"
 #include "EngineUtils.h"
 
 DEFINE_LOG_CATEGORY(LogTemplateCharacter);
@@ -59,6 +61,9 @@ AMinecraftCharacter::AMinecraftCharacter()
 	// Note: The skeletal mesh and anim blueprint references on the Mesh component (inherited from Character) 
 	// are set in the derived blueprint asset named ThirdPersonCharacter (to avoid direct content references in C++)
 	quickSlot.SetNum(8);
+
+	playerExp.Init(0, 2);	// 초기화 값 0, 배열 크기 2
+	playerLevel.Init(1, 2);
 }
 
 void AMinecraftCharacter::BeginPlay()
@@ -94,8 +99,11 @@ void AMinecraftCharacter::BeginPlay()
 	AItemBase* hoe = GetWorld()->SpawnActor<AItemBase>(hoe_bp, FVector::ZeroVector, FRotator::ZeroRotator);
 	quickSlot[1] = hoe;
 
-	AItemBase* crop = GetWorld()->SpawnActor<AItemBase>(crop_bp, FVector::ZeroVector, FRotator::ZeroRotator);
-	quickSlot[2] = crop;
+	AItemBase* wheat = GetWorld()->SpawnActor<AItemBase>(wheat_bp, FVector::ZeroVector, FRotator::ZeroRotator);
+	quickSlot[2] = wheat;
+
+	AItemBase* potato = GetWorld()->SpawnActor<AItemBase>(potato_bp, FVector::ZeroVector, FRotator::ZeroRotator);
+	quickSlot[3] = potato;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -128,10 +136,10 @@ void AMinecraftCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInput
 		// 퀵슬롯
 		EnhancedInputComponent->BindAction(ia_Wheel, ETriggerEvent::Triggered, this, &AMinecraftCharacter::ChangeSlotIndex);
 
-		// 우클릭(블록 생성)
+		// 좌클릭
 		EnhancedInputComponent->BindAction(ia_Left, ETriggerEvent::Started, this, &AMinecraftCharacter::UseItem);
 
-		// 우클릭(블록 생성)
+		// 우클릭
 		EnhancedInputComponent->BindAction(ia_Right, ETriggerEvent::Started, this, &AMinecraftCharacter::UseItem);
 	}
 	else
@@ -183,6 +191,9 @@ void AMinecraftCharacter::UseItem()
 		AItemBase* currentItem = quickSlot[currentSlotIndex];
 
 		if (currentItem)
+			UE_LOG(LogTemp, Warning, TEXT("currentItem : %s"), *currentItem->GetClass()->GetName());
+
+		if (currentItem)
 		{
 			switch (currentItem->itemType)
 			{
@@ -195,10 +206,11 @@ void AMinecraftCharacter::UseItem()
 				break;
 
 			case EItemType::Seed:	// 씨앗
-				PlantSeed();
+				PlantSeed(currentItem);
 				break;
 
 			default:
+				Harvest();
 				UE_LOG(LogTemp, Warning, TEXT("Empty Slot"));
 				break;
 			}
@@ -222,12 +234,89 @@ void AMinecraftCharacter::MiningBlock()
 	bCanMining = true;
 }
 
-void AMinecraftCharacter::PlantSeed()
+void AMinecraftCharacter::IncreaseExp(const FItemBaseData& _itemData)
+{
+	if (_itemData.itemTag == "Farm")
+	{
+		playerExp[0] += _itemData.itemExp;
+
+		if (playerExp[0] >= playerMaxExp)
+		{
+			// 레벨업
+			playerLevel[0]++;
+
+			// 경험치 갱신
+			playerExp[0] = FMath::Fmod(playerExp[0], playerMaxExp);
+		}
+
+		playerMainUI->IncreaseExpBar(0, playerExp[0]);
+	}
+	else if (_itemData.itemTag == "Mining")
+	{
+		playerExp[1] += _itemData.itemExp;
+
+		if (playerExp[1] >= playerMaxExp)
+		{
+			// 레벨업
+			playerLevel[1]++;
+
+			// 경험치 갱신
+			playerExp[1] = FMath::Fmod(playerExp[1], playerMaxExp);
+		}
+
+		playerMainUI->IncreaseExpBar(1, playerExp[1]);
+	}
+	UE_LOG(LogTemp, Warning, TEXT("itemTag : %s, playerExp : %f"), *_itemData.itemTag.ToString(), playerExp[0]);
+}
+
+void AMinecraftCharacter::PlantSeed(AItemBase* _currentItem)
 {
 	bCanPlanting = true;
-	UE_LOG(LogTemp, Warning, TEXT("plant seed successfully"));
+
+	if (bCanPlanting)
+	{
+		InitialCoordinates = HoveredCoordinates;
+
+		float spawnXLoc = InitialCoordinates.X * 100 + 50;
+		float spawnYLoc = InitialCoordinates.Y * 100 + 50;
+		float spawnZLoc = InitialCoordinates.Z * 100 + 100;
+		FVector spawnLoc = FVector(spawnXLoc, spawnYLoc, spawnZLoc);
+
+		// _currentItem : 인벤토리에서 플레이어가 들고 있는 씨앗 아이템
+		ACrop* crop = Cast<ACrop>(_currentItem);
+
+		if (crop)
+		{
+			TSubclassOf<ACrop> cropClassToSpawn = crop->GetClass();
+
+			if (cropClassToSpawn)
+			{
+				// 실제로 심어진 작물
+				ACrop* spawnedCrop = GetWorld()->SpawnActor<ACrop>(cropClassToSpawn, spawnLoc, FRotator::ZeroRotator);
+
+				UE_LOG(LogTemp, Warning, TEXT("plant seed successfully"));
+
+				spawnedCrop->Grow(spawnedCrop->cropData.growingTime, spawnedCrop);
+			}
+			else
+			{
+				UE_LOG(LogTemp, Warning, TEXT("cropClassToSpawn is null"));
+			}
+
+			
+
+			//UE_LOG(LogTemp, Warning, TEXT("cropName : %s, cropExp : %f, cropGrowingTime : %f"), *crop->cropData.cropName.ToString(), crop->cropData.cropExp, crop->cropData.growingTime);
+			//crop->cropData.cropExp
+		}
+	}
 
 }
+
+void AMinecraftCharacter::Harvest()
+{
+
+}
+
 void AMinecraftCharacter::PlaceBlock()
 {
 	//if (!block) 

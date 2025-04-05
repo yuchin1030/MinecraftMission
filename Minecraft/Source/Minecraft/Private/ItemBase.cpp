@@ -36,6 +36,7 @@ void AItemBase::OnOverlapItem(UPrimitiveComponent* OverlappedComponent, AActor* 
 	{
 		player->AddItemToInventory(itemData); // 인벤토리에 아이템 추가
 
+		player->IncreaseExp(itemData);
 		Destroy(); // 아이템 제거
 	}
 }

@@ -16,10 +16,16 @@ public:
 	FName itemName;
 
 	UPROPERTY(BlueprintReadWrite)
+	FName itemTag;
+
+	UPROPERTY(BlueprintReadWrite)
 	int32 itemAmount;
 
-	/*FItemBaseData()
-		: itemName("Default"), itemAmount(0) {}*/
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float itemExp;
+
+	FItemBaseData()
+		: itemName("Default"), itemTag("Default"), itemAmount(0), itemExp(0) {}
 };
 
 UENUM(BlueprintType)

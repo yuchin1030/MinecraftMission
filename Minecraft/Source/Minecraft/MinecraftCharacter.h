@@ -74,6 +74,12 @@ public:
 	TSubclassOf<class ACrop> crop_bp;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class AWheat> wheat_bp;
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class APotato> potato_bp;
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
 	int32 currentSlotIndex = 0;
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
@@ -81,6 +87,12 @@ public:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	class ABlock* block;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	FVector InitialCoordinates;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	FVector HoveredCoordinates;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	bool bCanMining = false;
@@ -98,10 +110,16 @@ public:
 	TMap<FName, FItemBaseData> inventory;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
-	float playerExp = 0;
+	TArray<float> playerExp;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	float playerMaxExp = 100;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
+	TArray<int32> playerLevel;
 
 	UFUNCTION()
-	void AddItemToInventory(const FItemBaseData& itemDataList);
+	void AddItemToInventory(const FItemBaseData& itemData);
 
 	UFUNCTION()
 	void PlaceBlock();
@@ -117,7 +135,14 @@ public:
 	void MiningBlock();
 
 	UFUNCTION()
-	void PlantSeed();
+	void PlantSeed(AItemBase* _currentItem);
+
+	UFUNCTION()
+	void Harvest();
+
+	UFUNCTION()
+	void IncreaseExp(const FItemBaseData& _itemData);
+
 protected:
 
 	/** Called for movement input */

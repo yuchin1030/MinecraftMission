@@ -4,17 +4,16 @@
 
 #include "CoreMinimal.h"
 #include "Crop.h"
-#include "Wheat.generated.h"
+#include "Potato.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class MINECRAFT_API AWheat : public ACrop
+class MINECRAFT_API APotato : public ACrop
 {
 	GENERATED_BODY()
 	
 public:
-	AWheat();
-
+	APotato();
 };
