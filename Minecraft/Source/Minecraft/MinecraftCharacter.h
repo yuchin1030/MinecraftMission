@@ -134,7 +134,7 @@ public:
 	UFUNCTION()
 	void MiningBlock();
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void PlantSeed(AItemBase* _currentItem);
 
 	UFUNCTION()

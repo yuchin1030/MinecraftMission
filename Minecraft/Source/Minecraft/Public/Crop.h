@@ -54,7 +54,7 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	bool bCanHarvest = false;
 
-	UFUNCTION()
+	UFUNCTION(BlueprintCallable)
 	void Grow(float _growingTime, ACrop* _spawnedCrop);
 
 	UFUNCTION(BlueprintImplementableEvent)
@@ -64,4 +64,12 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "MySettings")
 	TSubclassOf<class ACollectable> collectable_bp;
+
+	
+	// *********************
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Spawning")
+	TSubclassOf<AActor> ActorToSpawn;
+
+	UFUNCTION(BlueprintCallable, BlueprintImplementableEvent)
+	void SpawningCrop();
 };

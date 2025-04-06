@@ -39,8 +39,9 @@ void ACrop::Tick(float DeltaTime)
 
 			UE_LOG(LogTemp, Warning, TEXT("You can harvest!"));
 
-			ACollectable* collectable = GetWorld()->SpawnActor<ACollectable>(collectable_bp, GetActorTransform());
+			SpawningCrop();
 
+			// ACollectable* collectable = GetWorld()->SpawnActor<ACollectable>(collectable_bp, GetActorTransform());
 		}
 
 	}
