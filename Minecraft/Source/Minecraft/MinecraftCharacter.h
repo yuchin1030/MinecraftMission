@@ -138,9 +138,6 @@ public:
 	void PlantSeed(AItemBase* _currentItem);
 
 	UFUNCTION()
-	void Harvest();
-
-	UFUNCTION()
 	void IncreaseExp(const FItemBaseData& _itemData);
 
 protected:

@@ -210,7 +210,6 @@ void AMinecraftCharacter::UseItem()
 				break;
 
 			default:
-				Harvest();
 				UE_LOG(LogTemp, Warning, TEXT("Empty Slot"));
 				break;
 			}
@@ -309,11 +308,6 @@ void AMinecraftCharacter::PlantSeed(AItemBase* _currentItem)
 			//crop->cropData.cropExp
 		}
 	}
-
-}
-
-void AMinecraftCharacter::Harvest()
-{
 
 }
 

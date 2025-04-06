@@ -2,6 +2,7 @@
 
 
 #include "Crop.h"
+#include "Collectable.h"
 
 ACrop::ACrop()
 {
@@ -37,6 +38,9 @@ void ACrop::Tick(float DeltaTime)
 			spawnedCrop->smComp->SetMaterial(0, spawnedCrop->cropData.cropMat);
 
 			UE_LOG(LogTemp, Warning, TEXT("You can harvest!"));
+
+			ACollectable* collectable = GetWorld()->SpawnActor<ACollectable>(collectable_bp, GetActorTransform());
+
 		}
 
 	}
@@ -48,5 +52,6 @@ void ACrop::Grow(float _growingTime, ACrop* _spawnedCrop)
 	growingTime = _growingTime;
 	spawnedCrop = _spawnedCrop;
 }
+
 
 

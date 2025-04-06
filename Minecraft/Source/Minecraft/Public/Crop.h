@@ -50,10 +50,18 @@ public:
 	float growingTime = 0;
 
 	bool bCanGrow = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "MySettings")
 	bool bCanHarvest = false;
 
 	UFUNCTION()
 	void Grow(float _growingTime, ACrop* _spawnedCrop);
 
+	UFUNCTION(BlueprintImplementableEvent)
+	void Harvest();
+
 	ACrop* spawnedCrop;
+
+	UPROPERTY(EditAnywhere, Category = "MySettings")
+	TSubclassOf<class ACollectable> collectable_bp;
 };
